@@ -1,0 +1,18 @@
+{
+  "framework": "vite",
+  "buildCommand": "pnpm exec vite build",
+  "outputDirectory": "dist/public",
+  "functions": {
+    "api/clinic/*.js": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}
