@@ -93,3 +93,26 @@ curl -X POST https://your-domain.vercel.app/api/clinic/patients \
 - الصور الملتقطة في العرض التجريبي تبقى داخل المتصفح. للإنتاج، خزّن `file_url` في `patient_attachments` بعد رفع الملف إلى خدمة تخزين خاصة.
 - يوصى بإضافة مصادقة أطباء وصلاحيات قبل فتح API للعامة، وتقييد `CORS_ORIGIN` إلى نطاقك الفعلي بدلاً من `*`.
 - بيانات العرض محفوظة في `localStorage` للمحاكاة. يمكن لاحقاً استبدال دوال `useClinicData` بطبقة مزامنة تعتمد على HTTP مع queue للطلبات غير المتصلة.
+
+
+## نسخة Android والبناء عبر GitHub
+
+تمت إضافة نسخة Android مبنية على Capacitor داخل مجلد `android/` مع المعرّف `com.profusion.clinic`. تستخدم النسخة نفس واجهة React بعد إنتاج ملفات Vite، ولذلك لا يوجد تكرار لكود الواجهة.
+
+للبناء محلياً بعد تثبيت Android SDK:
+
+```bash
+pnpm install
+pnpm android:sync
+cd android
+./gradlew assembleDebug
+```
+
+كما تمت إضافة سير العمل `.github/workflows/android.yml`. عند كل دفع إلى `main` أو عند تشغيله يدوياً من تبويب **Actions**، سيقوم GitHub بتثبيت Node وJava، بناء الواجهة، مزامنة Capacitor، بناء `app-debug.apk`، ثم رفعه كـArtifact باسم `profusion-clinic-debug-apk`.
+
+بعد الدفع إلى GitHub:
+
+1. افتح تبويب **Actions** في مستودع `Profusion`.
+2. اختر **Build Android APK**.
+3. انتظر اكتمال المهمة، ثم نزّل Artifact باسم `profusion-clinic-debug-apk`.
+4. لإصدار إنتاجي، أضف لاحقاً keystore مشفراً ووقّع `assembleRelease` عبر GitHub Secrets.

@@ -1,0 +1,9 @@
+{
+  "appId": "com.profusion.clinic",
+  "appName": "عيادتي",
+  "webDir": "dist/public",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}
