@@ -25,10 +25,10 @@ export const initialClinicData = {
     { id: "AP-2205", patientId: "PT-1044", patientName: "ريم وليد الشهري", time: "13:00", date: "2026-09-24", type: "متابعة الغدة", doctor: "د. ليان السالم", status: "ملغي", phone: "966598765432" },
   ],
   bills: [
-    { id: "INV-7842", patient: "سارة أحمد العتيبي", patientId: "PT-1048", date: "2026-09-22", amount: 380, status: "مدفوعة", service: "كشف + تحاليل" },
-    { id: "INV-7841", patient: "عبدالله محمد القحطاني", patientId: "PT-1047", date: "2026-09-20", amount: 520, status: "معلقة", service: "استشارة قلب" },
-    { id: "INV-7840", patient: "نورة خالد الغامدي", patientId: "PT-1046", date: "2026-09-18", amount: 250, status: "مدفوعة", service: "فحص دوري" },
-    { id: "INV-7839", patient: "خالد صالح الدوسري", patientId: "PT-1045", date: "2026-09-16", amount: 310, status: "مدفوعة", service: "مراجعة تحاليل" },
+    { id: "INV-7842", patient: "سارة أحمد العتيبي", patientId: "PT-1048", date: "2026-09-22", amount: 380, status: "مدفوعة", category: "تحاليل", service: "تحليل سكر تراكمي وضغط" },
+    { id: "INV-7841", patient: "عبدالله محمد القحطاني", patientId: "PT-1047", date: "2026-09-20", amount: 520, status: "معلقة", category: "كشف / زيارة", service: "استشارة قلب" },
+    { id: "INV-7840", patient: "نورة خالد الغامدي", patientId: "PT-1046", date: "2026-09-18", amount: 250, status: "مدفوعة", category: "خروج", service: "كشف خروج ومتابعة" },
+    { id: "INV-7839", patient: "خالد صالح الدوسري", patientId: "PT-1045", date: "2026-09-16", amount: 310, status: "مدفوعة", category: "كشف / زيارة", service: "مراجعة تحاليل" },
   ],
   prescriptions: [
     { id: "RX-3019", patient: "سارة أحمد العتيبي", doctor: "د. ليان السالم", date: "2026-09-22", medicines: 3, diagnosis: "ارتفاع ضغط الدم" },
@@ -45,7 +45,13 @@ function readStoredData() {
   if (typeof window === "undefined") return cloneSeed();
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? { ...cloneSeed(), ...JSON.parse(saved) } : cloneSeed();
+    if (!saved) return cloneSeed();
+    const parsed = JSON.parse(saved);
+    const bills = (parsed.bills || []).map((bill) => ({
+      ...bill,
+      category: bill.category || (bill.service?.includes("تحاليل") ? "تحاليل" : "كشف / زيارة"),
+    }));
+    return { ...cloneSeed(), ...parsed, bills };
   } catch {
     return cloneSeed();
   }

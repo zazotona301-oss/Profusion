@@ -57,14 +57,14 @@ export default function CameraCapture({ onClose, onCapture }) {
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-7">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-teal-600">ملفات المرضى</p>
-            <h2 className="mt-1 text-lg font-extrabold text-slate-900">التقاط صورة أو قراءة كود المريض</h2>
+            <h2 className="mt-1 text-lg font-extrabold text-slate-900">تصوير ملف المريض أو تسجيل حضوره</h2>
           </div>
           <button onClick={onClose} className="icon-button" aria-label="إغلاق"><X size={19} /></button>
         </div>
 
         <div className="flex gap-2 border-b border-slate-100 px-5 pt-4 sm:px-7">
-          <button onClick={() => setMode("camera")} className={`capture-tab ${mode === "camera" ? "capture-tab-active" : ""}`}><Camera size={16} /> التقاط صورة</button>
-          <button onClick={() => setMode("scan")} className={`capture-tab ${mode === "scan" ? "capture-tab-active" : ""}`}><QrCode size={16} /> مسح QR / باركود</button>
+          <button onClick={() => setMode("camera")} className={`capture-tab ${mode === "camera" ? "capture-tab-active" : ""}`}><Camera size={16} /> تصوير الملف</button>
+          <button onClick={() => setMode("scan")} className={`capture-tab ${mode === "scan" ? "capture-tab-active" : ""}`}><QrCode size={16} /> تسجيل بالكود</button>
         </div>
 
         <div className="p-5 sm:p-7">
@@ -76,7 +76,7 @@ export default function CameraCapture({ onClose, onCapture }) {
                 {cameraError && <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 px-6 text-center text-white"><Camera size={30} className="mb-3 text-teal-300" /><p className="text-sm font-bold">تعذر الوصول إلى الكاميرا</p><p className="mt-1 text-xs text-slate-300">تأكد من منح المتصفح الإذن أو استخدم رفع صورة من جهازك.</p></div>}
               </div>
               <div className="flex flex-wrap gap-2">
-                <button onClick={capturedImage ? () => setCapturedImage("") : capture} className="primary-button flex-1"><Camera size={17} /> {capturedImage ? "التقاط من جديد" : "التقاط الآن"}</button>
+                <button onClick={capturedImage ? () => setCapturedImage("") : capture} className="primary-button flex-1"><Camera size={17} /> {capturedImage ? "تصوير من جديد" : "التقاط صورة"}</button>
                 <label className="secondary-button flex-1 cursor-pointer"><ImagePlus size={17} /> رفع صورة<input type="file" accept="image/*" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onload = () => { setCapturedImage(String(reader.result)); onCapture?.({ type: "image", value: String(reader.result) }); }; reader.readAsDataURL(file); } }} /></label>
               </div>
               {capturedImage && <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700"><span className="flex items-center gap-2"><CheckCircle2 size={17} /> تم حفظ المعاينة محلياً</span><button onClick={onClose} className="text-emerald-900 underline">إغلاق</button></div>}
