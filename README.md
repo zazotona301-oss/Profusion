@@ -150,3 +150,6 @@ cd android
 تم تنظيف `client/src` من ملفات القالب غير المستخدمة، وأصبحت ملفات مصدر الواجهة الفعلية بصيغة JSX فقط، مع الإبقاء على ملفات CSS اللازمة. ملفات الخادم وSQL وVercel وAndroid لم تُحذف لأنها جزء من التشغيل والنشر وليست مكونات واجهة.
 
 يتوفر API HTTP جاهز للنشر على Vercel تحت `/api/clinic`، ويستخدم `DATABASE_URL` للاتصال بـNeon، بينما يوفر `client/src/lib/clinicApi.jsx` عمليات health/list/get/create/update/remove. تم إضافة تصريح `android.permission.CAMERA` إلى AndroidManifest، ومكوّن الكاميرا يطلب إذن المتصفح تلقائياً عند فتح نافذة التصوير أو مسح QR. يلزم تشغيل الموقع عبر HTTPS في الإنتاج حتى يسمح المتصفح باستخدام الكاميرا.
+
+
+تم نقل عميل HTTP إلى المسار `client/clinicApi.jsx` في جذر مجلد `client` بناءً على تنظيم المشروع.
