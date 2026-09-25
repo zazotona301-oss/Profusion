@@ -175,6 +175,22 @@ cd android
 أصبحت واجهة Vite في الجذر القياسي `src/` مع `index.html` و`public/` في جذر المشروع، وتم ضبط alias `@` وVercel وفق ذلك. توفر الدالة `api/clinic/[resource].js` عمليات `GET` لجلب السجلات، و`POST` لإضافة البيانات، و`PATCH` لتعديلها، و`DELETE` لحذفها للموارد: `clinic_settings`, `doctors`, `patients`, `appointments`, `medical_records`, `prescriptions`, `prescription_items`, `invoices`, `invoice_items`, و`patient_attachments`. يجب ضبط `DATABASE_URL` في Vercel، وتشغيل `neon/schema.sql` مرة واحدة قبل استخدام API.
 
 
+## مراقبة أخطاء الباك إند
+
+تمت إضافة `@sentry/node` إلى خادم Express وtRPC. يضيف الخادم رقم طلب `requestId` لكل طلب، ويرصد أخطاء tRPC وأخطاء مسارات Express، ثم يعيد استجابة JSON موحدة بدلاً من انهيار الطلب. المراقبة معطلة افتراضياً حتى لا يتطلب التشغيل المحلي أي إعداد خارجي.
+
+لتفعيل إرسال الأخطاء إلى Sentry، أضف متغيرات البيئة التالية إلى بيئة الخادم فقط:
+
+```bash
+SENTRY_DSN=https://<key>@<organization>.ingest.sentry.io/<project>
+SENTRY_ENVIRONMENT=production
+SENTRY_TRACES_SAMPLE_RATE=0.1
+APP_VERSION=1.0.0
+```
+
+لا تضع `SENTRY_DSN` في متغير يبدأ بـ `VITE_` ولا ترسله إلى الواجهة. إذا وقع `uncaughtException` يسجل الخادم الخطأ ثم يوقف العملية بحالة فشل حتى تعيد منصة التشغيل تشغيلها بحالة سليمة، بدلاً من الاستمرار بحالة قد تكون غير آمنة.
+
+
 ## إصلاح فتح PDF
 
 أصبحت أزرار الروشتة والتقرير والحساب الطبي تنشئ مستند HTML محلياً عبر `Blob URL` وتفتحه في نافذة الطباعة، بدلاً من الاعتماد على رابط خارجي أو رابط GitHub. يمكن من نافذة الطباعة اختيار «حفظ كملف PDF» أو الطباعة مباشرة.
