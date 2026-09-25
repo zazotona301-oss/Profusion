@@ -7,6 +7,15 @@ describe("clinic local data", () => {
     expect(initialClinicData.appointments.length).toBeGreaterThan(0);
     expect(initialClinicData.bills.length).toBeGreaterThan(0);
     expect(initialClinicData.prescriptions.length).toBeGreaterThan(0);
+    expect(initialClinicData.medicalRecords.length).toBeGreaterThan(0);
+    expect(initialClinicData.medicalRecords[0].vitalSigns.bloodPressure).toBeTruthy();
+    expect(initialClinicData.medicalRecords[0].labResults).toBeTruthy();
+    expect(initialClinicData.medicalRecords.length).toBeGreaterThan(0);
+    expect(initialClinicData.medicalRecords[0].vitalSigns.bloodPressure).toBeTruthy();
+    expect(initialClinicData.medicalRecords[0].labResults).toBeTruthy();
+    expect(initialClinicData.medicalRecords.length).toBeGreaterThan(0);
+    expect(initialClinicData.medicalRecords[0].vitalSigns.bloodPressure).toBeTruthy();
+    expect(initialClinicData.medicalRecords[0].labResults).toBeTruthy();
   });
 
   it("formats ISO dates using the Arabic locale", () => {

@@ -37,6 +37,9 @@ export const initialClinicData = {
     { id: "RX-3018", patient: "عبدالله محمد القحطاني", doctor: "د. ليان السالم", date: "2026-09-20", medicines: 2, diagnosis: "خفقان متقطع" },
     { id: "RX-3017", patient: "خالد صالح الدوسري", doctor: "د. رامي الحربي", date: "2026-09-16", medicines: 1, diagnosis: "ارتفاع الكوليسترول" },
   ],
+  medicalRecords: [
+    { id: "MR-1001", patientId: "PT-1048", patientName: "سارة أحمد العتيبي", doctor: "د. ليان السالم", date: "2026-09-22", chiefComplaint: "صداع وارتفاع متكرر في الضغط", diagnosis: "ارتفاع ضغط الدم غير المنضبط", vitalSigns: { bloodPressure: "148/92", pulse: "84", temperature: "36.8", weight: "72", oxygen: "98" }, examination: "أصوات القلب منتظمة، لا يوجد ضيق تنفس أو وذمة.", labResults: "HbA1c: 7.1% · كوليسترول كلي: 218 mg/dL", plan: "متابعة الضغط منزلياً وإعادة الفحص بعد أسبوعين.", medications: "الاستمرار على العلاج الموصوف ومراجعة الجرعة." },
+  ],
 };
 
 function cloneSeed() {
@@ -53,7 +56,7 @@ function readStoredData() {
       ...bill,
       category: bill.category || (bill.service?.includes("تحاليل") ? "تحاليل" : "كشف / زيارة"),
     }));
-    return { ...cloneSeed(), ...parsed, clinic: { ...cloneSeed().clinic, ...(parsed.clinic || {}) }, bills };
+    return { ...cloneSeed(), ...parsed, clinic: { ...cloneSeed().clinic, ...(parsed.clinic || {}) }, bills, medicalRecords: parsed.medicalRecords || cloneSeed().medicalRecords };
   } catch {
     return cloneSeed();
   }
@@ -83,6 +86,7 @@ export function useClinicData() {
     addAppointment: (appointment) => setData((current) => ({ ...current, appointments: [appointment, ...current.appointments] })),
     updateAppointmentStatus: (id, status) => setData((current) => ({ ...current, appointments: current.appointments.map((item) => item.id === id ? { ...item, status } : item) })),
     addBill: (bill) => setData((current) => ({ ...current, bills: [bill, ...current.bills] })),
+    addMedicalRecord: (record) => setData((current) => ({ ...current, medicalRecords: [record, ...(current.medicalRecords || [])] })),
     updateClinicLogo: (logo) => setData((current) => ({ ...current, clinic: { ...current.clinic, logo } })),
     updateClinicSignature: (signature) => setData((current) => ({ ...current, clinic: { ...current.clinic, signature } })),
     resetDemo: () => setData(cloneSeed()),
