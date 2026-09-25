@@ -8,18 +8,56 @@ function escapeHtml(value) {
   })[character]);
 }
 
-export function openPrintableHtml(html) {
+let activePdfViewer = null;
+
+export function closePdfViewer() {
+  activePdfViewer?.close();
+}
+
+export function openPrintableHtml(html, title = "مستند طبي") {
+  closePdfViewer();
   const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const printWindow = window.open(url, "_blank", "noopener,noreferrer");
-  if (!printWindow) {
-    const link = document.createElement("a");
-    link.href = url;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.click();
-  }
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  const shell = document.createElement("section");
+  shell.className = "pdf-viewer-shell";
+  shell.setAttribute("role", "dialog");
+  shell.setAttribute("aria-modal", "true");
+  shell.innerHTML = `<div class="pdf-viewer-card"><header class="pdf-viewer-toolbar"><button class="pdf-viewer-close" type="button" aria-label="إغلاق">×</button><div class="pdf-viewer-title"><strong>${escapeHtml(title)}</strong><span>معاينة مناسبة للهاتف</span></div><div class="pdf-viewer-actions"><button class="pdf-download-button" type="button">تحميل PDF</button><button class="pdf-print-button" type="button">طباعة</button></div></header><div class="pdf-viewer-stage"><iframe title="معاينة ${escapeHtml(title)}" src="${url}"></iframe></div></div>`;
+  document.body.append(shell);
+  document.body.classList.add("pdf-viewer-open");
+  const iframe = shell.querySelector("iframe");
+  const close = () => {
+    window.removeEventListener("clinic:android-back", handleBack);
+    document.body.classList.remove("pdf-viewer-open");
+    shell.remove();
+    URL.revokeObjectURL(url);
+    activePdfViewer = null;
+  };
+  const handleBack = (event) => {
+    event.preventDefault();
+    close();
+  };
+  shell.querySelector(".pdf-viewer-close")?.addEventListener("click", close);
+  shell.addEventListener("click", (event) => {
+    if (event.target === shell) close();
+  });
+  shell.querySelector(".pdf-print-button")?.addEventListener("click", () => iframe?.contentWindow?.print());
+  shell.querySelector(".pdf-download-button")?.addEventListener("click", async () => {
+    const button = shell.querySelector(".pdf-download-button");
+    if (!iframe?.contentDocument?.body) return;
+    button.disabled = true;
+    button.textContent = "جارٍ تجهيز PDF...";
+    try {
+      const { default: html2pdf } = await import("html2pdf.js");
+      const sheet = iframe.contentDocument.querySelector(".sheet") || iframe.contentDocument.body;
+      await html2pdf().set({ margin: 0, filename: `${title}.pdf`, image: { type: "jpeg", quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: "mm", format: "a4", orientation: "portrait" } }).from(sheet).save();
+    } finally {
+      button.disabled = false;
+      button.textContent = "تحميل PDF";
+    }
+  });
+  window.addEventListener("clinic:android-back", handleBack);
+  activePdfViewer = { close };
 }
 
 function createPrintWindow(title, clinic, body) {
