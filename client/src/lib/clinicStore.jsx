@@ -8,6 +8,7 @@ export const initialClinicData = {
     specialty: "الطب الباطني وأمراض القلب",
     phone: "+966 11 456 7821",
     address: "الرياض، حي المروج، شارع الأمير تركي",
+    logo: "",
   },
   patients: [
     { id: "PT-1048", name: "سارة أحمد العتيبي", phone: "966501234567", gender: "أنثى", age: 34, bloodType: "O+", lastVisit: "2026-09-22", status: "متابعة", tags: ["ضغط", "سكري"] },
@@ -51,7 +52,7 @@ function readStoredData() {
       ...bill,
       category: bill.category || (bill.service?.includes("تحاليل") ? "تحاليل" : "كشف / زيارة"),
     }));
-    return { ...cloneSeed(), ...parsed, bills };
+    return { ...cloneSeed(), ...parsed, clinic: { ...cloneSeed().clinic, ...(parsed.clinic || {}) }, bills };
   } catch {
     return cloneSeed();
   }
@@ -81,6 +82,7 @@ export function useClinicData() {
     addAppointment: (appointment) => setData((current) => ({ ...current, appointments: [appointment, ...current.appointments] })),
     updateAppointmentStatus: (id, status) => setData((current) => ({ ...current, appointments: current.appointments.map((item) => item.id === id ? { ...item, status } : item) })),
     addBill: (bill) => setData((current) => ({ ...current, bills: [bill, ...current.bills] })),
+    updateClinicLogo: (logo) => setData((current) => ({ ...current, clinic: { ...current.clinic, logo } })),
     resetDemo: () => setData(cloneSeed()),
   }), []);
 
