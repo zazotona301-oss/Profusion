@@ -12,12 +12,12 @@ import { openPrintableHtml, printMedicalDocument, printMedicalRecordReport } fro
 
 const NAV_ITEMS = [
   { id: "dashboard", label: "نظرة عامة", icon: LayoutDashboard },
-  { id: "patients", label: "المرضى والسجلات", icon: UsersRound, asset: "/public/assets/patient-folder.svg" },
-  { id: "diagnosis", label: "تشخيص الطبيب", icon: Stethoscope, asset: "/public/assets/doctor-diagnosis.svg" },
+  { id: "patients", label: "المرضى والسجلات", icon: UsersRound, asset: "/public/assets/patient-folder.jpg" },
+  { id: "diagnosis", label: "تشخيص الطبيب", icon: Stethoscope, asset: "/public/assets/doctor-diagnosis.jpg" },
   { id: "reminders", label: "تذكيرات المراجعة", icon: Bell, asset: "/public/assets/appointment-calendar.svg", badge: "reminders" },
   { id: "appointments", label: "المواعيد والحجوزات", icon: CalendarDays, asset: "/public/assets/appointment-calendar.svg", badge: 5 },
-  { id: "billing", label: "الحسابات الطبية", icon: WalletCards, asset: "/public/assets/invoice-billing.svg" },
-  { id: "prescriptions", label: "الروشتات والتقارير", icon: FileText, asset: "/public/assets/prescription.svg" },
+  { id: "billing", label: "الحسابات الطبية", icon: WalletCards, asset: "/public/assets/invoice-billing.jpg" },
+  { id: "prescriptions", label: "الروشتات والتقارير", icon: FileText, asset: "/public/assets/prescription.jpg" },
 ];
 
 const PAGE_META = {
@@ -35,7 +35,7 @@ function Sidebar({ active, onNavigate, mobileOpen, onClose, isOnline, reminderCo
   return <>
     {mobileOpen && <button className="fixed inset-0 z-30 bg-slate-950/30 lg:hidden" onClick={onClose} aria-label="إغلاق القائمة" />}
     <aside className={`fixed inset-y-0 right-0 z-40 flex w-[268px] flex-col border-l border-slate-200/70 bg-white/95 px-4 py-5 shadow-[0_12px_48px_rgba(15,23,42,0.05)] backdrop-blur transition-transform duration-200 lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}>
-      <div className="flex items-center gap-3 px-3 pb-7"><span className="brand-mark"><img src="/public/assets/clinic-mark.svg" alt="" className="brand-mark-image" /></span><div><p className="text-[15px] font-extrabold tracking-tight text-slate-900">عيادتي</p><p className="text-[10px] font-bold text-slate-400">نظام الإدارة الطبية</p></div><button onClick={onClose} className="icon-button mr-auto lg:hidden"><X size={18} /></button></div>
+      <div className="flex items-center gap-3 px-3 pb-7"><span className="brand-mark"><img src="/public/assets/clinic-mark.jpg" alt="" className="brand-mark-image" /></span><div><p className="text-[15px] font-extrabold tracking-tight text-slate-900">عيادتي</p><p className="text-[10px] font-bold text-slate-400">نظام الإدارة الطبية</p></div><button onClick={onClose} className="icon-button mr-auto lg:hidden"><X size={18} /></button></div>
       <div className="mb-3 px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate-400">مساحة العمل</div>
       <nav className="space-y-1">{NAV_ITEMS.map(({ id, label, icon: Icon, asset, badge }) => <button key={id} onClick={() => { onNavigate(id); onClose(); }} className={`nav-item ${active === id ? "nav-item-active" : ""}`}>{asset ? <img src={asset} alt="" className="nav-asset-icon" /> : <Icon size={18} strokeWidth={active === id ? 2.3 : 1.9} />}<span>{label}</span>{badge && <span className="nav-badge">{badge === "reminders" ? reminderCount : badge}</span>}</button>)}</nav>
       <div className="my-6 h-px bg-slate-100" />
