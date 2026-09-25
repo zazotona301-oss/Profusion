@@ -1,18 +1,30 @@
 import { neon } from "@neondatabase/serverless";
 
-const resourceTables = {
-  patients: { table: "patients", orderBy: "created_at desc" },
+const resources = {
+  clinic_settings: { table: "clinic_settings", orderBy: "created_at desc" },
   doctors: { table: "doctors", orderBy: "created_at desc" },
+  patients: { table: "patients", orderBy: "created_at desc" },
   appointments: { table: "appointments", orderBy: "starts_at asc" },
+  medical_records: { table: "medical_records", orderBy: "record_date desc" },
   prescriptions: { table: "prescriptions", orderBy: "issued_at desc" },
+  prescription_items: { table: "prescription_items", orderBy: "created_at desc" },
   invoices: { table: "invoices", orderBy: "issued_at desc" },
+  invoice_items: { table: "invoice_items", orderBy: "created_at desc" },
+  patient_attachments: { table: "patient_attachments", orderBy: "created_at desc" },
 };
 
-const patientColumns = ["file_number", "full_name", "phone", "email", "national_id", "date_of_birth", "gender", "blood_type", "address", "emergency_contact_name", "emergency_contact_phone", "allergies", "chronic_conditions", "notes", "status"];
-const doctorColumns = ["full_name", "specialty", "license_number", "phone", "email", "avatar_url", "is_active"];
-const appointmentColumns = ["patient_id", "doctor_id", "starts_at", "ends_at", "type", "status", "reason", "notes"];
-const prescriptionColumns = ["patient_id", "doctor_id", "appointment_id", "diagnosis", "instructions", "issued_at"];
-const invoiceColumns = ["invoice_number", "patient_id", "appointment_id", "subtotal", "discount", "tax", "total", "amount_paid", "currency", "status", "due_date", "notes", "issued_at"];
+const columns = {
+  clinic_settings: ["clinic_name", "specialty", "phone", "whatsapp_phone", "address", "logo_url", "timezone"],
+  doctors: ["full_name", "specialty", "license_number", "phone", "email", "avatar_url", "is_active"],
+  patients: ["file_number", "full_name", "phone", "email", "national_id", "date_of_birth", "gender", "blood_type", "address", "emergency_contact_name", "emergency_contact_phone", "allergies", "chronic_conditions", "notes", "status"],
+  appointments: ["patient_id", "doctor_id", "starts_at", "ends_at", "type", "status", "reason", "notes", "reminder_sent_at", "checked_in_at"],
+  medical_records: ["patient_id", "doctor_id", "appointment_id", "record_date", "chief_complaint", "diagnosis", "vital_signs", "assessment", "plan", "attachments"],
+  prescriptions: ["patient_id", "doctor_id", "appointment_id", "diagnosis", "instructions", "issued_at", "shared_at"],
+  prescription_items: ["prescription_id", "medicine_name", "dosage", "frequency", "duration", "instructions"],
+  invoices: ["invoice_number", "patient_id", "appointment_id", "subtotal", "discount", "tax", "total", "amount_paid", "currency", "status", "due_date", "notes", "issued_at", "paid_at"],
+  invoice_items: ["invoice_id", "description", "quantity", "unit_price", "total"],
+  patient_attachments: ["patient_id", "medical_record_id", "file_name", "file_url", "mime_type", "file_size"],
+};
 
 function sendHeaders(res) {
   res.setHeader("Access-Control-Allow-Origin", process.env.CORS_ORIGIN || "*");
@@ -25,18 +37,18 @@ function readJson(req) {
   return typeof req.body === "string" ? JSON.parse(req.body) : req.body;
 }
 
-function allowedPayload(payload, columns) {
-  return Object.fromEntries(columns.filter((column) => payload[column] !== undefined).map((column) => [column, payload[column]]));
+function allowedPayload(payload, resource) {
+  return Object.fromEntries((columns[resource] || []).filter((column) => payload[column] !== undefined).map((column) => [column, payload[column]]));
 }
 
 async function listResource(sql, resource, query) {
-  const config = resourceTables[resource];
+  const config = resources[resource];
   if (resource === "patients" && query.q) {
     const pattern = `%${query.q}%`;
     return sql.query(`select * from patients where full_name ilike $1 or file_number ilike $1 or phone ilike $1 order by ${config.orderBy}`, [pattern]);
   }
   if (resource === "appointments" && query.from && query.to) {
-    return sql.query(`select a.*, p.full_name as patient_name, p.phone as patient_phone, d.full_name as doctor_name from appointments a join patients p on p.id = a.patient_id join doctors d on d.id = a.doctor_id where a.starts_at >= $1 and a.starts_at < $2 order by ${config.orderBy}`, [query.from, query.to]);
+    return sql.query("select a.*, p.full_name as patient_name, p.phone as patient_phone, d.full_name as doctor_name from appointments a join patients p on p.id = a.patient_id join doctors d on d.id = a.doctor_id where a.starts_at >= $1 and a.starts_at < $2 order by a.starts_at asc", [query.from, query.to]);
   }
   if (resource === "prescriptions") {
     return sql.query("select r.*, p.full_name as patient_name, d.full_name as doctor_name, coalesce(json_agg(ri order by ri.created_at) filter (where ri.id is not null), '[]') as medicines from prescriptions r join patients p on p.id = r.patient_id join doctors d on d.id = r.doctor_id left join prescription_items ri on ri.prescription_id = r.id group by r.id, p.full_name, d.full_name order by r.issued_at desc");
@@ -52,8 +64,8 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
 
   const resource = String(req.query?.resource || "").toLowerCase();
-  const config = resourceTables[resource];
-  if (!config) return res.status(404).json({ error: "Unknown resource", allowed: Object.keys(resourceTables) });
+  const config = resources[resource];
+  if (!config) return res.status(404).json({ error: "Unknown resource", allowed: Object.keys(resources) });
   if (!process.env.DATABASE_URL) return res.status(503).json({ error: "DATABASE_URL is not configured" });
 
   const sql = neon(process.env.DATABASE_URL);
@@ -69,9 +81,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "POST") {
-      const body = readJson(req);
-      const columns = resource === "patients" ? patientColumns : resource === "doctors" ? doctorColumns : resource === "appointments" ? appointmentColumns : resource === "prescriptions" ? prescriptionColumns : invoiceColumns;
-      const payload = allowedPayload(body, columns);
+      const payload = allowedPayload(readJson(req), resource);
       const keys = Object.keys(payload);
       if (!keys.length) return res.status(400).json({ error: "Request body is empty" });
       const values = keys.map((key) => payload[key]);
@@ -82,9 +92,7 @@ export default async function handler(req, res) {
 
     if (req.method === "PATCH") {
       if (!id) return res.status(400).json({ error: "id query parameter is required" });
-      const body = readJson(req);
-      const columns = resource === "patients" ? patientColumns : resource === "doctors" ? doctorColumns : resource === "appointments" ? appointmentColumns : resource === "prescriptions" ? prescriptionColumns : invoiceColumns;
-      const payload = allowedPayload(body, columns);
+      const payload = allowedPayload(readJson(req), resource);
       const keys = Object.keys(payload);
       if (!keys.length) return res.status(400).json({ error: "No editable fields supplied" });
       const values = keys.map((key) => payload[key]);

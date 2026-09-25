@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatArabicDate, initialClinicData } from "../client/src/lib/clinicStore.jsx";
+import { formatArabicDate, initialClinicData } from "../src/lib/clinicStore.jsx";
 
 describe("clinic local data", () => {
   it("ships with the core medical workspace collections", () => {

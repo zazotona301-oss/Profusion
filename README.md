@@ -153,3 +153,8 @@ cd android
 
 
 تم نقل عميل HTTP إلى المسار `client/clinicApi.jsx` في جذر مجلد `client` بناءً على تنظيم المشروع.
+
+
+## بنية Vite وCRUD عبر Neon
+
+أصبحت واجهة Vite في الجذر القياسي `src/` مع `index.html` و`public/` في جذر المشروع، وتم ضبط alias `@` وVercel وفق ذلك. توفر الدالة `api/clinic/[resource].js` عمليات `GET` لجلب السجلات، و`POST` لإضافة البيانات، و`PATCH` لتعديلها، و`DELETE` لحذفها للموارد: `clinic_settings`, `doctors`, `patients`, `appointments`, `medical_records`, `prescriptions`, `prescription_items`, `invoices`, `invoice_items`, و`patient_attachments`. يجب ضبط `DATABASE_URL` في Vercel، وتشغيل `neon/schema.sql` مرة واحدة قبل استخدام API.
