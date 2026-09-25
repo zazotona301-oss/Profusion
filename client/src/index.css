@@ -119,6 +119,9 @@ button:active { transform: scale(0.98); }
 .logo-preview { display: grid; min-width: 112px; min-height: 92px; place-items: center; overflow: hidden; border: 1px dashed #9bd9d0; border-radius: 16px; background: #f1fbf9; color: #0f766e; }
 .logo-preview img { width: 100%; height: 100%; max-height: 112px; object-fit: contain; padding: 10px; }
 .logo-preview span { display: inline-flex; align-items: center; gap: 6px; padding: 16px; font-size: 11px; font-weight: 800; }
+.signature-preview { display: grid; min-width: 190px; min-height: 92px; place-items: center; overflow: hidden; border: 1px dashed #9bd9d0; border-radius: 16px; background: #fff; color: #0f766e; }
+.signature-preview img { width: 100%; height: 100%; max-height: 112px; object-fit: contain; padding: 12px 18px; }
+.signature-preview span { display: inline-flex; align-items: center; gap: 6px; padding: 16px; font-size: 11px; font-weight: 800; }
 .billing-form { border-color: #bdece5; background: #fbfffe; }
 .billing-filters { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #f1f5f9; padding: 16px 18px; }
 .filter-chip { display: inline-flex; min-height: 32px; align-items: center; justify-content: center; border: 1px solid #e5eaf0; border-radius: 9px; background: #fff; padding: 6px 10px; color: #64748b; font-size: 10px; font-weight: 800; transition: background .18s ease, color .18s ease, border .18s ease; }

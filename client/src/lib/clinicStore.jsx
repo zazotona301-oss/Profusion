@@ -9,6 +9,7 @@ export const initialClinicData = {
     phone: "+966 11 456 7821",
     address: "الرياض، حي المروج، شارع الأمير تركي",
     logo: "",
+    signature: "",
   },
   patients: [
     { id: "PT-1048", name: "سارة أحمد العتيبي", phone: "966501234567", gender: "أنثى", age: 34, bloodType: "O+", lastVisit: "2026-09-22", status: "متابعة", tags: ["ضغط", "سكري"] },
@@ -83,6 +84,7 @@ export function useClinicData() {
     updateAppointmentStatus: (id, status) => setData((current) => ({ ...current, appointments: current.appointments.map((item) => item.id === id ? { ...item, status } : item) })),
     addBill: (bill) => setData((current) => ({ ...current, bills: [bill, ...current.bills] })),
     updateClinicLogo: (logo) => setData((current) => ({ ...current, clinic: { ...current.clinic, logo } })),
+    updateClinicSignature: (signature) => setData((current) => ({ ...current, clinic: { ...current.clinic, signature } })),
     resetDemo: () => setData(cloneSeed()),
   }), []);
 
