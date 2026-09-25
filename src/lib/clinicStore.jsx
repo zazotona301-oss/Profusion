@@ -40,6 +40,9 @@ export const initialClinicData = {
   medicalRecords: [
     { id: "MR-1001", patientId: "PT-1048", patientName: "سارة أحمد العتيبي", doctor: "د. ليان السالم", date: "2026-09-22", chiefComplaint: "صداع وارتفاع متكرر في الضغط", diagnosis: "ارتفاع ضغط الدم غير المنضبط", vitalSigns: { bloodPressure: "148/92", pulse: "84", temperature: "36.8", weight: "72", oxygen: "98" }, examination: "أصوات القلب منتظمة، لا يوجد ضيق تنفس أو وذمة.", labResults: "HbA1c: 7.1% · كوليسترول كلي: 218 mg/dL", plan: "متابعة الضغط منزلياً وإعادة الفحص بعد أسبوعين.", medications: "الاستمرار على العلاج الموصوف ومراجعة الجرعة." },
   ],
+  reminders: [
+    { id: "REM-1001", patientId: "PT-1048", patientName: "سارة أحمد العتيبي", phone: "966501234567", date: "2026-10-06", time: "09:00", title: "مراجعة ضغط الدم", status: "pending", sourceRecordId: "MR-1001" },
+  ],
 };
 
 function cloneSeed() {
@@ -56,7 +59,7 @@ function readStoredData() {
       ...bill,
       category: bill.category || (bill.service?.includes("تحاليل") ? "تحاليل" : "كشف / زيارة"),
     }));
-    return { ...cloneSeed(), ...parsed, clinic: { ...cloneSeed().clinic, ...(parsed.clinic || {}) }, bills, medicalRecords: parsed.medicalRecords || cloneSeed().medicalRecords };
+    return { ...cloneSeed(), ...parsed, clinic: { ...cloneSeed().clinic, ...(parsed.clinic || {}) }, bills, medicalRecords: parsed.medicalRecords || cloneSeed().medicalRecords, reminders: parsed.reminders || cloneSeed().reminders };
   } catch {
     return cloneSeed();
   }
@@ -86,7 +89,8 @@ export function useClinicData() {
     addAppointment: (appointment) => setData((current) => ({ ...current, appointments: [appointment, ...current.appointments] })),
     updateAppointmentStatus: (id, status) => setData((current) => ({ ...current, appointments: current.appointments.map((item) => item.id === id ? { ...item, status } : item) })),
     addBill: (bill) => setData((current) => ({ ...current, bills: [bill, ...current.bills] })),
-    addMedicalRecord: (record) => setData((current) => ({ ...current, medicalRecords: [record, ...(current.medicalRecords || [])] })),
+    addMedicalRecord: (record) => setData((current) => ({ ...current, medicalRecords: [record, ...(current.medicalRecords || [])], reminders: record.followUpDate ? [{ id: `REM-${Date.now()}`, patientId: record.patientId, patientName: record.patientName, phone: current.patients.find((patient) => patient.id === record.patientId)?.phone || "", date: record.followUpDate, time: record.followUpTime || "09:00", title: record.followUpTitle || "مراجعة طبية", status: "pending", sourceRecordId: record.id }, ...(current.reminders || [])] : (current.reminders || []) })),
+    updateReminderStatus: (id, status) => setData((current) => ({ ...current, reminders: (current.reminders || []).map((reminder) => reminder.id === id ? { ...reminder, status } : reminder) })),
     updateClinicLogo: (logo) => setData((current) => ({ ...current, clinic: { ...current.clinic, logo } })),
     updateClinicSignature: (signature) => setData((current) => ({ ...current, clinic: { ...current.clinic, signature } })),
     resetDemo: () => setData(cloneSeed()),

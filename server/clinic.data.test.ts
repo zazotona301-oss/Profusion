@@ -10,12 +10,8 @@ describe("clinic local data", () => {
     expect(initialClinicData.medicalRecords.length).toBeGreaterThan(0);
     expect(initialClinicData.medicalRecords[0].vitalSigns.bloodPressure).toBeTruthy();
     expect(initialClinicData.medicalRecords[0].labResults).toBeTruthy();
-    expect(initialClinicData.medicalRecords.length).toBeGreaterThan(0);
-    expect(initialClinicData.medicalRecords[0].vitalSigns.bloodPressure).toBeTruthy();
-    expect(initialClinicData.medicalRecords[0].labResults).toBeTruthy();
-    expect(initialClinicData.medicalRecords.length).toBeGreaterThan(0);
-    expect(initialClinicData.medicalRecords[0].vitalSigns.bloodPressure).toBeTruthy();
-    expect(initialClinicData.medicalRecords[0].labResults).toBeTruthy();
+    expect(initialClinicData.reminders.length).toBeGreaterThan(0);
+    expect(initialClinicData.reminders[0].date).toBeTruthy();
   });
 
   it("formats ISO dates using the Arabic locale", () => {
