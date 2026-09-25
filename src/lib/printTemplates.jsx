@@ -8,6 +8,38 @@ function escapeHtml(value) {
   })[character]);
 }
 
+const pdfOptions = {
+  margin: 0,
+  image: { type: "jpeg", quality: 0.98 },
+  html2canvas: { scale: 2, useCORS: true },
+  jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+};
+
+/** تصدير PDF للويب أو حفظه مؤقتاً وفتحه في نافذة المشاركة الأصلية على Android. */
+export async function saveAndExportPDF(element, fileName, opt = pdfOptions) {
+  const { default: html2pdf } = await import("html2pdf.js");
+  const { Capacitor } = await import("@capacitor/core");
+
+  if (!Capacitor.isNativePlatform()) {
+    await html2pdf().set({ ...opt, filename: fileName }).from(element).save();
+    return;
+  }
+
+  const { Filesystem, Directory } = await import("@capacitor/filesystem");
+  const { Share } = await import("@capacitor/share");
+  const pdfDataUri = await html2pdf().set({ ...opt, filename: fileName }).from(element).outputPdf("datauristring");
+  const base64Data = pdfDataUri.split(",")[1];
+  if (!base64Data) throw new Error("تعذر إنشاء بيانات PDF");
+
+  const savedFile = await Filesystem.writeFile({ path: fileName, data: base64Data, directory: Directory.Cache });
+  await Share.share({
+    title: fileName,
+    text: "إليك ملف PDF للتقرير المطلوب",
+    url: savedFile.uri,
+    dialogTitle: "فتح أو مشاركة ملف PDF",
+  });
+}
+
 let activePdfViewer = null;
 
 export function closePdfViewer() {
@@ -48,16 +80,8 @@ export function openPrintableHtml(html, title = "مستند طبي") {
     button.disabled = true;
     button.textContent = "جارٍ تجهيز المشاركة...";
     try {
-      const { default: html2pdf } = await import("html2pdf.js");
       const sheet = iframe.contentDocument.querySelector(".sheet") || iframe.contentDocument.body;
-      const pdfBlob = await html2pdf().set({ margin: 0, filename: `${title}.pdf`, image: { type: "jpeg", quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: "mm", format: "a4", orientation: "portrait" } }).from(sheet).outputPdf("blob");
-      const file = new File([pdfBlob], `${title}.pdf`, { type: "application/pdf" });
-      const canShareFile = typeof navigator.share === "function" && (!navigator.canShare || navigator.canShare({ files: [file] }));
-      if (!canShareFile) {
-        window.alert("مشاركة ملفات PDF غير متاحة على هذا الجهاز. افتح التطبيق على Android ثم جرّب مرة أخرى.");
-        return;
-      }
-      await navigator.share({ files: [file], title, text: `${title} من عيادتي` });
+      await saveAndExportPDF(sheet, `${title}.pdf`, pdfOptions);
     } finally {
       button.disabled = false;
       button.textContent = "مشاركة PDF";
