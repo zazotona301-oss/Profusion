@@ -22,7 +22,7 @@ export function openPrintableHtml(html, title = "مستند طبي") {
   shell.className = "pdf-viewer-shell";
   shell.setAttribute("role", "dialog");
   shell.setAttribute("aria-modal", "true");
-  shell.innerHTML = `<div class="pdf-viewer-card"><header class="pdf-viewer-toolbar"><button class="pdf-viewer-close" type="button" aria-label="إغلاق">×</button><div class="pdf-viewer-title"><strong>${escapeHtml(title)}</strong><span>معاينة مناسبة للهاتف</span></div><div class="pdf-viewer-actions"><button class="pdf-download-button" type="button">تحميل PDF</button><button class="pdf-print-button" type="button">طباعة</button></div></header><div class="pdf-viewer-stage"><iframe title="معاينة ${escapeHtml(title)}" src="${url}"></iframe></div></div>`;
+  shell.innerHTML = `<div class="pdf-viewer-card"><header class="pdf-viewer-toolbar"><button class="pdf-viewer-close" type="button" aria-label="إغلاق">×</button><div class="pdf-viewer-title"><strong>${escapeHtml(title)}</strong><span>اختر التطبيق الذي تريد الحفظ أو الإرسال من خلاله</span></div><div class="pdf-viewer-actions"><button class="pdf-download-button" type="button">مشاركة PDF</button><button class="pdf-print-button" type="button">طباعة</button></div></header><div class="pdf-viewer-stage"><iframe title="معاينة ${escapeHtml(title)}" src="${url}"></iframe></div></div>`;
   document.body.append(shell);
   document.body.classList.add("pdf-viewer-open");
   const iframe = shell.querySelector("iframe");
@@ -46,14 +46,21 @@ export function openPrintableHtml(html, title = "مستند طبي") {
     const button = shell.querySelector(".pdf-download-button");
     if (!iframe?.contentDocument?.body) return;
     button.disabled = true;
-    button.textContent = "جارٍ تجهيز PDF...";
+    button.textContent = "جارٍ تجهيز المشاركة...";
     try {
       const { default: html2pdf } = await import("html2pdf.js");
       const sheet = iframe.contentDocument.querySelector(".sheet") || iframe.contentDocument.body;
-      await html2pdf().set({ margin: 0, filename: `${title}.pdf`, image: { type: "jpeg", quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: "mm", format: "a4", orientation: "portrait" } }).from(sheet).save();
+      const pdfBlob = await html2pdf().set({ margin: 0, filename: `${title}.pdf`, image: { type: "jpeg", quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: "mm", format: "a4", orientation: "portrait" } }).from(sheet).outputPdf("blob");
+      const file = new File([pdfBlob], `${title}.pdf`, { type: "application/pdf" });
+      const canShareFile = typeof navigator.share === "function" && (!navigator.canShare || navigator.canShare({ files: [file] }));
+      if (!canShareFile) {
+        window.alert("مشاركة ملفات PDF غير متاحة على هذا الجهاز. افتح التطبيق على Android ثم جرّب مرة أخرى.");
+        return;
+      }
+      await navigator.share({ files: [file], title, text: `${title} من عيادتي` });
     } finally {
       button.disabled = false;
-      button.textContent = "تحميل PDF";
+      button.textContent = "مشاركة PDF";
     }
   });
   window.addEventListener("clinic:android-back", handleBack);
